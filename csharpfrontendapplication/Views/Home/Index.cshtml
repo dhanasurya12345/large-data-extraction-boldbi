@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "Home";
+    Layout = null;
+    var embedSignature = ViewBag.EmbedSignature;
+}
+
+
+
+<!DOCTYPE html>
+<html>
+
+
+
+<head>
+    <link href="~/wwwroot/css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700" />
+    <link rel="stylesheet" href="~/Content/Site.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.5/jsrender.min.js">
+<script type="text/javascript" src="https://cdn.boldbi.com/embedded-sdk/v4.2.16/embed-js.min.js">
+<script type="text/javascript" src="~/Scripts/Embed/Index.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+var embedCode = "@embedSignature";
+var dashboardUrl = "http://localhost:59102/bi/site/site1/dashboards/d26bb67b-70f0-4d7a-8ece-1fbc0f8b5912/DIPTestDashboard/Untitled%20(8)";// URL of the dashboard to be embedded
+$(document).ready(function () {
+var iframeUrl = "<iframe src='" + dashboardUrl + "?" + embedCode + "' id='dashboard-frame' width='100%' height='100%' allowfullscreen frameborder='0'></iframe>";
+$("#dashboard").append(iframeUrl);
+});
+    </script>
+</head>
+
+
+
+<body>
+    <form method='post' action="" enctype="multipart/form-data">
+        <label for="fileUpload"><b>Upload file:</b></label><br />
+           <input type="file" id="file" name="filename"><br />
+        <div style="display:inline;float:left">
+            <input type="button" id="but_upload" name="upload button" value="SUBMIT" style="float:left">
+            <div id="upl" style="
+               float: left;
+               margin-top:-30px;
+               padding-left: 180px;">
+
+
+
+            </div>
+
+
+        </div>
+    </form>
+
+
+
+    <style>
+        #file {
+            /* background: #b5b5b5;
+            border: black dashed 1px;
+            height: 32px;
+            text-align: center;
+            color: #fff;
+            padding-top: 12px;*/
+
+            width: 300px;
+            background: white;
+            border: none;
+            outline: none;
+            box-shadow: 10px 5px 10px black;
+            border-radius: 50px;
+        }
+        ::-webkit-file-upload-button{
+            border:none;
+            background:#720505;
+            border-radius:50px;
+            height:40px;
+            color:white;
+            width:100px;
+            box-shadow:2px 2px 2px grey;
+
+        }
+        #but_upload {
+            width: 100px;
+            /* height: 20px*/;
+            background-color: #555555;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 20px 8px;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+
+
+
+/*
+        .active-drop {
+            background: #77bafa !important;
+            border: solid 2px blue !important;
+            opacity: .5;
+            color: black !important;
+        }*/
+    </style>
+
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // $("#upl").empty();
+            $('#but_upload').click(function () {
+                $("#upl").empty();
+                $("#upl").append('<img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"style="width: 50px; height: 20px; color:green" />',' File is Uploading...');
+              //  $("#upl").append('<img src="https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif" alt=""style="width: 25px; height: 15px; color:green" />', ' File is Uploading...');
+                //$(this).after('Hiiii');
+               
+                var fd = new FormData();
+                var files = $('#file')[0].files[0];
+                fd.append('file', files);
+                //alert(fd);
+                $.ajax({
+
+
+
+                    url: 'http://localhost:49054/api/DipSample/savefiles',
+                    type: 'post',
+                    data: fd, 
+                   
+                    contentType: false,
+                    processData: false,
+                    success: function (respose) {
+                        alert(respose);
+                        $("#upl").empty();
+                        $("#upl").append('<img src="https://static9.depositphotos.com/1431107/1143/i/950/depositphotos_11437164-stock-photo-green-tick.jpg"alt=""style="width: 30px; height: 20px;" />', ' File uploaded Successfully');
+                      
+                    },
+                    error: function (respose) {
+                        $("#upl").empty();
+                        $("#upl").append('<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWFntcWBEUs8GXR2NGvYddqKxoT-H5n4PBd_Qm_iaIPsrOEWIKaWYL7F3ft92M6ZTWd6Q&usqp=CAU" alt=""style="width: 25px; height: 20px;" />', ' File uploaded failed');
+                     
+                    }
+                    
+
+
+                });
+
+
+
+               
+            });
+        });
+
+
+
+
+
+
+    </script>
+
+
+
+   
+
+
+
+    <div id="dashboard" style="width: 100%; height: 600px"></div>
+
+
+
+</body>
+</html>
