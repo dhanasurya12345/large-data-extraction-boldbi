@@ -8,7 +8,7 @@ namespace LargeFileExtraction
     public class AppConfiguration
     {
         public DipConfiguration DIPConfiguration { get; set; }
-        public PostgreSQLConnectionString PostgreSQLConnectionString { get; set; }
+        public PostgreSQL PostgreSQL { get; set; }
     }
 
     public class DipConfiguration
@@ -21,7 +21,7 @@ namespace LargeFileExtraction
 
     }
 
-    public class PostgreSQLConnectionString
+    public class PostgreSQL
     {
         public string ConnectionString { get; set; }
     }

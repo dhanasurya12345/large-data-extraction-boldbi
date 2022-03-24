@@ -91,7 +91,7 @@ namespace LargeFileExtraction
         private void ExecuteNonQueries(StringBuilder columnName, StringBuilder columnSchema, string csvPath)
         {
 
-            var connectionString = FileController.ReadAppConfiguration().PostgreSQLConnectionString.ConnectionString;
+            var connectionString = FileController.ReadAppConfiguration().PostgreSQL.ConnectionString;
             var connection = new NpgsqlConnection(connectionString);
             connection.Open();
 

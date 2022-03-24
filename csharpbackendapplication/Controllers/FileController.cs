@@ -49,10 +49,10 @@ namespace LargeFileExtraction.Controllers
 
                 //if ("dip")
                 //{
-                var appConfiguration = ReadAppConfiguration();
-                DipHelper dipHelper = new DipHelper();
-                dipHelper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
-                var resp = "Uploaded! DIP workflow started successfully";
+                //var appConfiguration = ReadAppConfiguration();
+                //DipHelper dipHelper = new DipHelper();
+                //dipHelper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
+               // var resp = "Uploaded! DIP workflow started successfully";
 
                 //}
                 //else
@@ -60,16 +60,21 @@ namespace LargeFileExtraction.Controllers
                 XlsioHelper xlsioHelper = new XlsioHelper(uploadFullPath, fileNameWithoutExtension);
                 if (uploadFileName.EndsWith(".csv"))
                 {
+
                     xlsioHelper.CsvReader();
+                    var resp = "Uploaded! Csv File moved to  Postgress Database Successfully.";
+
                     return Ok(resp);
                 }
                 else
                 {
                     xlsioHelper.ExcelReader();
+                    var resp = "Uploaded! Excel File moved to Postgress Database Successfully.";
+
                     return Ok(resp);
                 }
                 //}
-                return Ok(resp);
+               // return Ok(resp);
 
             }
             catch (Exception e)
@@ -109,6 +114,13 @@ namespace LargeFileExtraction.Controllers
                         throw e;
                     }
                 }
+                else
+                {
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -120,7 +132,7 @@ namespace LargeFileExtraction.Controllers
 
         public static AppConfiguration ReadAppConfiguration()
         {
-            using (StreamReader file = System.IO.File.OpenText(Path.Combine(Directory.GetCurrentDirectory(), "DipConfig", "configuration.json")))
+            using (StreamReader file = System.IO.File.OpenText(Path.Combine(Directory.GetCurrentDirectory(),"configuration.json")))
             {
                 Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
                 AppConfiguration config = (AppConfiguration)serializer.Deserialize(file, typeof(AppConfiguration));
