@@ -1,12 +1,12 @@
 {
 	"DIPConfiguration": {
-		"HostName": "synclapn-27322",
-		"PortNumber": "60017",
-		"ProcessGroupId": "69c673b2-017f-1000-88bf-ee2c770020be",
-		"Username": "dhanasurya",
-		"Password": "Surya@12345"
+		"HostName": "<DIP Hostname>",
+		"PortNumber": "<DIP PortNumber>",
+		"ProcessGroupId": "<Process Group ID>",
+		"Username": "<UMS username or Dip Login UserName>",
+		"Password": "<UMS password or Dip Login>"
 	},
 	"PostgreSQL": {
-		"ConnectionString": "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres;"
+		"ConnectionString": ""
 	}
 }
