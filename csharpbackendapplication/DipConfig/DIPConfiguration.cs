@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DipSampleUploadButton
+namespace LargeFileExtraction
 {
-    public class UserUtility
+    public class DIPConfiguration
     {
         public string HostName { get; set; }
         public string PortNumber { get; set; }
@@ -14,9 +14,9 @@ namespace DipSampleUploadButton
         public string Password { get; set; }
 
     }
-    public class Root
+    public class DIP
     {
-        public UserUtility UserUtility { get; set; }
+        public DIPConfiguration DIPConfiguration { get; set; }
     }
 
 }

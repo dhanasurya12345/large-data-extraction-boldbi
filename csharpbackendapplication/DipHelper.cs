@@ -1,35 +1,18 @@
-﻿using DipSampleUploadButton.Repository;
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace DipSampleUploadButton.Controllers
+namespace LargeFileExtraction
 {
-    class ProgramController
+    class DipHelper
     {
-        
-        public static string clientId = null;
-        public string inputDirectory = null;
-        public string tableName = null;
-        public string filepath = null;
-        public string filename = null;
-        public  Dictionary<string, string> valuePairs = new Dictionary<string, string>();
-        public  Dictionary<string, string> Processors = new Dictionary<string, string>();
-        public  Dictionary<string, int> ProcessorVersions = new Dictionary<string, int>();
         public static int getfileVersion;
         public static int putDatabaseRecordVersion;
-
-       
-
         public static string getFileDict = null;
         public static string putDatabaseRecordDict = null;
-
-        public object HttpFileCoCollection { get; private set; }
 
         /// <summary>
         /// 
@@ -40,9 +23,7 @@ namespace DipSampleUploadButton.Controllers
         /// <returns></returns>
         public string UmsDetails(string url,string username,string password)
         {
-            string accessToken = "";
-            ////POST request to generate access token
-            
+            string accessToken = "";            
             try
             {
                 WebRequest request = WebRequest.Create(url + "access/token");
@@ -58,7 +39,6 @@ namespace DipSampleUploadButton.Controllers
                 dataStream = response.GetResponseStream();
                 StreamReader reader = new StreamReader(dataStream);
                 accessToken = reader.ReadToEnd();
-                
                 reader.Close();
                 dataStream.Close();
                 response.Close();
@@ -69,17 +49,19 @@ namespace DipSampleUploadButton.Controllers
             }
             return accessToken;
         }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="url"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public string ClientDetails(string url, string accessToken)
+        public string GetClientId(string url, string accessToken)
         {
             try
             {
                 // GET request to get client id
+                string clientId = null;
                 var httpWebRequestClientId = (HttpWebRequest)WebRequest.Create(url + "flow/client-id");
                 httpWebRequestClientId.Method = "GET";
                 httpWebRequestClientId.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -96,10 +78,13 @@ namespace DipSampleUploadButton.Controllers
                 throw;
             }
         }
-        public  void Details(string url, string processGroupId, string accessToken)
+
+        public void DIPProcessDetails(string url, string processGroupId, string accessToken)
         {
             try
             {
+                Dictionary<string, string> Processors = new Dictionary<string, string>();
+                Dictionary<string, int> ProcessorVersions = new Dictionary<string, int>();
                 var httpWebRequestId = (HttpWebRequest)WebRequest.Create(url + "flow/process-groups/" + processGroupId);
                 httpWebRequestId.Method = "GET";
                 httpWebRequestId.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -107,7 +92,7 @@ namespace DipSampleUploadButton.Controllers
                 using (var streamReaderId = new StreamReader(httpResponseId.GetResponseStream()))
                 {
                     var processGroupResult = streamReaderId.ReadToEnd();
-                    var processorsData = JsonConvert.DeserializeObject<JsonProperty>(processGroupResult).processGroupFlow.flow.processors;
+                    var processorsData = JsonConvert.DeserializeObject<DIPProperties>(processGroupResult).processGroupFlow.flow.processors;
 
                     foreach (var items in processorsData)
                     {
@@ -119,42 +104,41 @@ namespace DipSampleUploadButton.Controllers
                 putDatabaseRecordDict = Processors["PutDatabaseRecord"];
                 getfileVersion = ProcessorVersions["GetFile"];
                 putDatabaseRecordVersion = ProcessorVersions["PutDatabaseRecord"];
-               
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
         
-        public  void GetFile(string url, string getFileDict, int getfileVersion,string accessToken,string uploadPath,string uploadFileName)
+        public void StartGetFileProcessor(string url, string clientId, string accessToken,string uploadPath,string uploadFileName)
         {
             try
             {
-                inputDirectory = string.IsNullOrEmpty(uploadPath) ? @"C:\Users\DhanasuryaAnandhan\Downloads\large (1)" : uploadPath;
-                filename = string.IsNullOrEmpty(uploadFileName) ? "large.xlsx" : uploadFileName;               
-                filepath = inputDirectory.Replace(@"\", @"\\");               
-                var httpWebRequestQd = (HttpWebRequest)WebRequest.Create(url + "processors/" + getFileDict);
-                httpWebRequestQd.ContentType = "application/json";
-                httpWebRequestQd.Headers.Add("Authorization", "Bearer " + accessToken);
-                httpWebRequestQd.Method = "PUT";
-                using (var streamWriterQuery = new StreamWriter(httpWebRequestQd.GetRequestStream()))
+                string filepath = uploadPath.Replace(@"\", @"\\");               
+                var httpWebRequest = (HttpWebRequest)WebRequest.Create(url + "processors/" + getFileDict);
+                httpWebRequest.ContentType = "application/json";
+                httpWebRequest.Headers.Add("Authorization", "Bearer " + accessToken);
+                httpWebRequest.Method = "PUT";
+                using (var streamWriterQuery = new StreamWriter(httpWebRequest.GetRequestStream()))
                 {
-                    string jsondata = "{\"revision\":{\"clientId\":\"" + clientId + "\",\"version\":\"" + getfileVersion + "\"},\"component\":{\"id\":\"" + getFileDict + "\",\"config\": {\"properties\": {\"Input Directory\":\"" + filepath + "\",\"File Filter\":\"" + filename + "\"}}}}";
+                    string jsondata = "{\"revision\":{\"clientId\":\"" + clientId + "\",\"version\":\"" + getfileVersion + "\"},\"component\":{\"id\":\"" + getFileDict + "\",\"config\": {\"properties\": {\"Input Directory\":\"" + filepath + "\",\"File Filter\":\"" + uploadFileName + "\"}}}}";
                     streamWriterQuery.Write(jsondata);
                 }
-                HttpWebResponse httpResponseQd = null;
-                try
-                {
-                    httpResponseQd = (HttpWebResponse)httpWebRequestQd.GetResponse();
-                }
-                catch (Exception ex){ 
-                }
-                using (var streamReaderQuery = new StreamReader(httpResponseQd.GetResponseStream()))
-                {
-                    var putQuery = streamReaderQuery.ReadToEnd();
+                //HttpWebResponse httpResponseQd = null;
+                //try
+                //{
+                //    httpResponseQd = (HttpWebResponse)httpWebRequest.GetResponse();
+                //}
+                //catch (Exception ex)
+                //{
+                //    throw ex;
+                //}
+                //using (var streamReaderQuery = new StreamReader(httpResponseQd.GetResponseStream()))
+                //{
+                //    var putQuery = streamReaderQuery.ReadToEnd();
                     
-                }
+                //}
             }
             catch (Exception)
             {
@@ -162,7 +146,7 @@ namespace DipSampleUploadButton.Controllers
             }
         }
         
-        public  void StartProcessGroup(string url, string state, string processGroupId, string accessToken)
+        public void StartProcessGroup(string url, string state, string processGroupId, string accessToken)
         {
             try
             {
@@ -175,31 +159,16 @@ namespace DipSampleUploadButton.Controllers
                     string jsondata = "{\"id\":\"" + processGroupId + "\",\"state\":\"" + state + "\"}";
                     streamWriterStart.Write(jsondata);
                 }
-                var httpResponseStart = (HttpWebResponse)httpWebRequestStart.GetResponse();
-                using (var streamReaderStart = new StreamReader(httpResponseStart.GetResponseStream()))
-                {
-                    var putStart = streamReaderStart.ReadToEnd();
-                }
+                //var httpResponseStart = (HttpWebResponse)httpWebRequestStart.GetResponse();
+                //using (var streamReaderStart = new StreamReader(httpResponseStart.GetResponseStream()))
+                //{
+                //    var putStart = streamReaderStart.ReadToEnd();
+                //}
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
-
-
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DipSampleUploadButton
+namespace LargeFileExtraction
 {
     public class Startup
     {
@@ -60,7 +60,7 @@ namespace DipSampleUploadButton
             
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "DipSampleUploadButton", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "LargeFileExtraction", Version = "v1" });
             });
         }
 
@@ -93,7 +93,7 @@ namespace DipSampleUploadButton
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DipSampleUploadButton v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LargeFileExtraction v1"));
             }
 
             app.UseRouting(

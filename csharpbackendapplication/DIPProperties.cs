@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DipSampleUploadButton.Repository
+namespace LargeFileExtraction
 {
-    public class JsonProperty
+    public class DIPProperties
     {
         public Permissions permissions { get; set; }
         public Processgroupflow processGroupFlow { get; set; }

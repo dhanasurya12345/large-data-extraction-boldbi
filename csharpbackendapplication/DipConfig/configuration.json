@@ -1,0 +1,9 @@
+{
+	"DIPConfiguration": {
+		"HostName": "<DIP Hostname>",
+		"PortNumber": "<DIP Port>",
+		"ProcessGroupId": "<Processs Group ID>",
+		"Username": "<UMS username or DIP Login username>",
+		"Password": "<UMS password or DIP login password>"
+	}
+}
