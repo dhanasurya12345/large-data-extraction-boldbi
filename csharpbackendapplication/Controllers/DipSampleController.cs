@@ -172,7 +172,7 @@ namespace DipSampleUploadButton.Controllers
         private void ConsoleApplication()
         {
 
-            var cs = "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres";
+            var cs = "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres;CommandTimeout=600;";
             var con = new NpgsqlConnection(cs);
             con.Open();
 
@@ -270,7 +270,7 @@ namespace DipSampleUploadButton.Controllers
             //cmd.ExecuteNonQuery();
 
             //con.Close();
-            var cs = "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres";
+            var cs = "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres;CommandTimeout=600;";
             var con = new NpgsqlConnection(cs);
             con.Open();
 
