@@ -24,10 +24,8 @@ namespace LargeFileExtraction.Controllers
     public class FileController : ControllerBase
 
     {
-        //DIP variables
         private string uploadPath = "";
         private string uploadFileName = "";
-        //Xlsio variables
         private string uploadFullPath = "";
         private string fileNameWithoutExtension = "";
         
@@ -52,21 +50,22 @@ namespace LargeFileExtraction.Controllers
                 //if ("dip")
                 //{
                 var appConfiguration = ReadAppConfiguration();
-                DipHelper helper = new DipHelper();
-                helper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
+                DipHelper dipHelper = new DipHelper();
+                dipHelper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
                 var resp = "Uploaded! DIP workflow started successfully";
 
                 //}
                 //else
                 //{
+                XlsioHelper xlsioHelper = new XlsioHelper(uploadFullPath, fileNameWithoutExtension);
                 if (uploadFileName.EndsWith(".csv"))
                 {
-                    CsvReader();
+                    xlsioHelper.CsvReader();
                     return Ok(resp);
                 }
                 else
                 {
-                    ExcelReader();
+                    xlsioHelper.ExcelReader();
                     return Ok(resp);
                 }
                 //}
@@ -84,14 +83,14 @@ namespace LargeFileExtraction.Controllers
         {
             try
             {
-                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), "upload");
+                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
                 if (!Directory.Exists(pathBuilt))
                 {
                     Directory.CreateDirectory(pathBuilt);
                 }
                 uploadFileName = file.FileName;
                 uploadPath = pathBuilt;
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "upload", file.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploads", file.FileName);
                 uploadFullPath = path;
                 fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
 
@@ -119,7 +118,7 @@ namespace LargeFileExtraction.Controllers
             return file.FileName;
         }
 
-        private static AppConfiguration ReadAppConfiguration()
+        public static AppConfiguration ReadAppConfiguration()
         {
             using (StreamReader file = System.IO.File.OpenText(Path.Combine(Directory.GetCurrentDirectory(), "DipConfig", "configuration.json")))
             {
@@ -129,104 +128,7 @@ namespace LargeFileExtraction.Controllers
             }
         }
 
-        private void ExcelReader()
-        {
-            //Creates a new instance for ExcelEngine
-            ExcelEngine excelEngine = new ExcelEngine();
-
-            FileStream stream = new FileStream(uploadFullPath, FileMode.Open);
-            //Loads or open an existing workbook through Open method of IWorkbooks
-            IWorkbook workbook = excelEngine.Excel.Workbooks.Open(stream);
-
-            var row = workbook.Worksheets[0].Rows[0];
-            //var rowcount=row.Cells.Count();
-
-            StringBuilder columnSchema = new StringBuilder();
-            StringBuilder columnName = new StringBuilder();
-
-            for (int i = 0; i < row.Cells.Length; i++)
-            {
-                if (i > 0)
-                {
-                    columnSchema.Append(",");
-                    columnName.Append(",");
-                }
-                columnName.Append(row.Cells[i].Value);
-                columnSchema.Append(row.Cells[i].Value);
-                columnSchema.Append(" ");
-                columnSchema.Append("varchar(250)");
-            }
-
-            var csvPath = Path.ChangeExtension(uploadFullPath, "csv");
-            workbook.SaveAs(new FileStream(csvPath, FileMode.Create), ",");
-
-            stream.Dispose();
-            stream.Close();
-            workbook.Close();
-            excelEngine.Dispose();
-
-            ExecuteNonQueries(columnName, columnSchema, csvPath);
-        }
-
-        private void CsvReader()
-        {
-            //Loads or open an existing workbook through Open method of IWorkbooks
-            var streamreader = new StreamReader(uploadFullPath);
-             
-            //read header row
-            var row = streamreader.ReadLine().Split(',');
-
-            StringBuilder columnSchema = new StringBuilder();
-            StringBuilder columnName = new StringBuilder();
-
-            for (int i = 0; i < row.Length; i++)
-            {
-                if (i > 0)
-                {
-                    columnSchema.Append(",");
-                    columnName.Append(",");
-                }
-                columnName.Append(row[i]);
-                columnSchema.Append(row[i]);
-                columnSchema.Append(" ");
-                columnSchema.Append("varchar(250)");
-            }
-
-            streamreader.Close();
-
-            ExecuteNonQueries(columnName, columnSchema, uploadFullPath);
-        }
-
-        private void ExecuteNonQueries(StringBuilder columnName, StringBuilder columnSchema, string csvPath)
-        {
-
-            var connectionString = ReadAppConfiguration().PostgreSQLConnectionString.ConnectionString;
-            var connection = new NpgsqlConnection(connectionString);
-            connection.Open();
-
-            var droptableQuery = $"DROP TABLE IF EXISTS " + fileNameWithoutExtension + ";";
-            var dropTable = new NpgsqlCommand();
-            dropTable.Connection = connection;
-            dropTable.CommandTimeout = 600;
-            dropTable.CommandText = droptableQuery;
-            dropTable.ExecuteNonQuery();
-
-            var createTableQuery = $"CREATE TABLE " + fileNameWithoutExtension + "(" + columnSchema + ")";
-            var createTable = new NpgsqlCommand(createTableQuery);
-            createTable.Connection = connection;
-            createTable.CommandTimeout = 600;
-            createTable.ExecuteNonQuery();
-
-            var copyQuery = $@"COPY " + fileNameWithoutExtension + "(" + columnName + ") FROM '" + csvPath + "' DELIMITER ',' CSV HEADER";
-            var copyTable = new NpgsqlCommand();
-            copyTable.CommandText = copyQuery;
-            copyTable.CommandTimeout = 600;
-            copyTable.CommandType = System.Data.CommandType.Text;
-            copyTable.Connection = connection;
-            copyTable.ExecuteNonQuery();
-
-            connection.Close();
-        }
+       
 
     }
 }

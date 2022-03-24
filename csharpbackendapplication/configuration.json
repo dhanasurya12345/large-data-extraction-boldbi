@@ -6,5 +6,5 @@
 		"Username": "<UMS username or DIP Login username>",
 		"Password": "<UMS password or DIP login password>"
 	}
-	"PostgreSQLConnectionString":  "serevr=name;user=test;"
+	"PostgreSQLConnectionString":  "<PostgreSQL Connection String>"
 }

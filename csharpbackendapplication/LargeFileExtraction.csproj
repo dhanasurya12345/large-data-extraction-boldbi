@@ -5,21 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DipConfig\**" />
-    <Compile Remove="Properties\PublishProfiles\**" />
-    <Compile Remove="UploadedFiles\**" />
-    <Content Remove="DipConfig\**" />
-    <Content Remove="Properties\PublishProfiles\**" />
-    <Content Remove="UploadedFiles\**" />
-    <EmbeddedResource Remove="DipConfig\**" />
-    <EmbeddedResource Remove="Properties\PublishProfiles\**" />
-    <EmbeddedResource Remove="UploadedFiles\**" />
-    <None Remove="DipConfig\**" />
-    <None Remove="Properties\PublishProfiles\**" />
-    <None Remove="UploadedFiles\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Aspose.Cells" Version="22.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Npgsql" Version="6.0.3" />
@@ -27,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="upload\" />
+    <Folder Include="uploads\" />
   </ItemGroup>
 
   <ItemGroup>
