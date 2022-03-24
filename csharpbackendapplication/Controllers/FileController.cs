@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.StaticFiles;
 using System.Threading;
 using System.Net.Http;
 using System.Net;
-using System.Text;
 using Newtonsoft.Json;
 using Npgsql;
 using Syncfusion.XlsIO;
+using System.Text.Json;
+using System.Text;
 
 namespace LargeFileExtraction.Controllers
 {
@@ -50,8 +51,9 @@ namespace LargeFileExtraction.Controllers
 
                 //if ("dip")
                 //{
-                var dIPConfiguration = ReadDIPConfiguration();
-                DipWorkFlow(dIPConfiguration);
+                var appConfiguration = ReadAppConfiguration();
+                DipHelper helper = new DipHelper();
+                helper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
                 var resp = "Uploaded! DIP workflow started successfully";
 
                 //}
@@ -117,32 +119,13 @@ namespace LargeFileExtraction.Controllers
             return file.FileName;
         }
 
-        private static DIPConfiguration ReadDIPConfiguration()
+        private static AppConfiguration ReadAppConfiguration()
         {
             using (StreamReader file = System.IO.File.OpenText(Path.Combine(Directory.GetCurrentDirectory(), "DipConfig", "configuration.json")))
             {
-                JsonSerializer serializer = new JsonSerializer();
-                DIP dip = (DIP)serializer.Deserialize(file, typeof(DIP));
-                return dip.DIPConfiguration;
-            }
-        }
-
-        private void DipWorkFlow(DIPConfiguration dipConfig)
-        {
-            try
-            {
-                DipHelper helper = new DipHelper();
-                string url = string.Format("https://{0}:{1}/dataintegration-api/", dipConfig.HostName, dipConfig.PortNumber);
-                string accessToken = helper.UmsDetails(url, dipConfig.Username, dipConfig.Password);
-                string clientid = helper.GetClientId(url, accessToken);
-                helper.StartProcessGroup(url, "STOPPED", dipConfig.ProcessGroupId, accessToken);
-                helper.DIPProcessDetails(url, dipConfig.ProcessGroupId, accessToken);
-                helper.StartGetFileProcessor(url, clientid, accessToken, uploadPath, uploadFileName);
-                helper.StartProcessGroup(url, "RUNNING", dipConfig.ProcessGroupId, accessToken);
-            }
-            catch (Exception ex)
-            {
-                throw;
+                Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+                AppConfiguration config = (AppConfiguration)serializer.Deserialize(file, typeof(AppConfiguration));
+                return config;
             }
         }
 
@@ -158,36 +141,21 @@ namespace LargeFileExtraction.Controllers
             var row = workbook.Worksheets[0].Rows[0];
             //var rowcount=row.Cells.Count();
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder columnSchema = new StringBuilder();
             StringBuilder columnName = new StringBuilder();
 
             for (int i = 0; i < row.Cells.Length; i++)
             {
                 if (i > 0)
                 {
-                    builder.Append(",");
+                    columnSchema.Append(",");
                     columnName.Append(",");
                 }
                 columnName.Append(row.Cells[i].Value);
-                builder.Append(row.Cells[i].Value);
-                builder.Append(" ");
-                builder.Append("varchar(250)");
+                columnSchema.Append(row.Cells[i].Value);
+                columnSchema.Append(" ");
+                columnSchema.Append("varchar(250)");
             }
-
-            //int i = 0;
-            //foreach(var cell in row.Cells)
-            //{
-            //    if (i > 0)
-            //    {
-            //        builder.Append(",");
-            //        columnName.Append(",");
-            //    }
-            //    columnName.Append(cell.Value);
-            //    builder.Append(cell.Value);
-            //    builder.Append(" ");
-            //    builder.Append("varchar(250)");
-            //    i++;
-            //}
 
             var csvPath = Path.ChangeExtension(uploadFullPath, "csv");
             workbook.SaveAs(new FileStream(csvPath, FileMode.Create), ",");
@@ -197,7 +165,7 @@ namespace LargeFileExtraction.Controllers
             workbook.Close();
             excelEngine.Dispose();
 
-            ExecuteNonQueries(columnName, builder, csvPath);
+            ExecuteNonQueries(columnName, columnSchema, csvPath);
         }
 
         private void CsvReader()
@@ -208,49 +176,51 @@ namespace LargeFileExtraction.Controllers
             //read header row
             var row = streamreader.ReadLine().Split(',');
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder columnSchema = new StringBuilder();
             StringBuilder columnName = new StringBuilder();
 
-            int i = 0;
-            foreach (var cell in row)
+            for (int i = 0; i < row.Length; i++)
             {
                 if (i > 0)
                 {
-                    builder.Append(",");
+                    columnSchema.Append(",");
                     columnName.Append(",");
                 }
-                columnName.Append(cell);
-                builder.Append(cell);
-                builder.Append(" ");
-                builder.Append("varchar(250)");
-                i++;
+                columnName.Append(row[i]);
+                columnSchema.Append(row[i]);
+                columnSchema.Append(" ");
+                columnSchema.Append("varchar(250)");
             }
 
             streamreader.Close();
 
-            ExecuteNonQueries(columnName, builder, uploadFullPath);
+            ExecuteNonQueries(columnName, columnSchema, uploadFullPath);
         }
 
-        private void ExecuteNonQueries(StringBuilder columnName, StringBuilder builder, string csvPath)
+        private void ExecuteNonQueries(StringBuilder columnName, StringBuilder columnSchema, string csvPath)
         {
-            var connectionString = "Host=localhost;Username=postgres;Password=Surya@12345;Database=postgres;CommandTimeout=600;";
+
+            var connectionString = ReadAppConfiguration().PostgreSQLConnectionString.ConnectionString;
             var connection = new NpgsqlConnection(connectionString);
             connection.Open();
 
             var droptableQuery = $"DROP TABLE IF EXISTS " + fileNameWithoutExtension + ";";
             var dropTable = new NpgsqlCommand();
             dropTable.Connection = connection;
+            dropTable.CommandTimeout = 600;
             dropTable.CommandText = droptableQuery;
             dropTable.ExecuteNonQuery();
 
-            var createTableQuery = $"CREATE TABLE " + fileNameWithoutExtension + "(" + builder + ")";
+            var createTableQuery = $"CREATE TABLE " + fileNameWithoutExtension + "(" + columnSchema + ")";
             var createTable = new NpgsqlCommand(createTableQuery);
             createTable.Connection = connection;
+            createTable.CommandTimeout = 600;
             createTable.ExecuteNonQuery();
 
             var copyQuery = $@"COPY " + fileNameWithoutExtension + "(" + columnName + ") FROM '" + csvPath + "' DELIMITER ',' CSV HEADER";
             var copyTable = new NpgsqlCommand();
             copyTable.CommandText = copyQuery;
+            copyTable.CommandTimeout = 600;
             copyTable.CommandType = System.Data.CommandType.Text;
             copyTable.Connection = connection;
             copyTable.ExecuteNonQuery();

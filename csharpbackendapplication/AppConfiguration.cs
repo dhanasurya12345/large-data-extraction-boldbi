@@ -5,7 +5,13 @@ using System.Threading.Tasks;
 
 namespace LargeFileExtraction
 {
-    public class DIPConfiguration
+    public class AppConfiguration
+    {
+        public DipConfiguration DIPConfiguration { get; set; }
+        public PostgreSQLConnectionString PostgreSQLConnectionString { get; set; }
+    }
+
+    public class DipConfiguration
     {
         public string HostName { get; set; }
         public string PortNumber { get; set; }
@@ -14,9 +20,11 @@ namespace LargeFileExtraction
         public string Password { get; set; }
 
     }
-    public class DIP
+
+    public class PostgreSQLConnectionString
     {
-        public DIPConfiguration DIPConfiguration { get; set; }
+        public string ConnectionString { get; set; }
     }
 
+   
 }

@@ -5,12 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DipConfig\**" />
     <Compile Remove="Properties\PublishProfiles\**" />
     <Compile Remove="UploadedFiles\**" />
+    <Content Remove="DipConfig\**" />
     <Content Remove="Properties\PublishProfiles\**" />
     <Content Remove="UploadedFiles\**" />
+    <EmbeddedResource Remove="DipConfig\**" />
     <EmbeddedResource Remove="Properties\PublishProfiles\**" />
     <EmbeddedResource Remove="UploadedFiles\**" />
+    <None Remove="DipConfig\**" />
     <None Remove="Properties\PublishProfiles\**" />
     <None Remove="UploadedFiles\**" />
   </ItemGroup>

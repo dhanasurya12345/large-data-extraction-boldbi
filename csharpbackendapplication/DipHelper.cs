@@ -14,6 +14,24 @@ namespace LargeFileExtraction
         public static string getFileDict = null;
         public static string putDatabaseRecordDict = null;
 
+
+        internal void DipWorkFlow(DipConfiguration dipConfig, string uploadPath, string uploadFileName)
+        {
+            try
+            {
+                string url = string.Format("https://{0}:{1}/dataintegration-api/", dipConfig.HostName, dipConfig.PortNumber);
+                string accessToken = UmsDetails(url, dipConfig.Username, dipConfig.Password);
+                string clientid = GetClientId(url, accessToken);
+                StartProcessGroup(url, "STOPPED", dipConfig.ProcessGroupId, accessToken);
+                DIPProcessDetails(url, dipConfig.ProcessGroupId, accessToken);
+                StartGetFileProcessor(url, clientid, accessToken, uploadPath, uploadFileName);
+                StartProcessGroup(url, "RUNNING", dipConfig.ProcessGroupId, accessToken);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -125,24 +143,10 @@ namespace LargeFileExtraction
                     string jsondata = "{\"revision\":{\"clientId\":\"" + clientId + "\",\"version\":\"" + getfileVersion + "\"},\"component\":{\"id\":\"" + getFileDict + "\",\"config\": {\"properties\": {\"Input Directory\":\"" + filepath + "\",\"File Filter\":\"" + uploadFileName + "\"}}}}";
                     streamWriterQuery.Write(jsondata);
                 }
-                //HttpWebResponse httpResponseQd = null;
-                //try
-                //{
-                //    httpResponseQd = (HttpWebResponse)httpWebRequest.GetResponse();
-                //}
-                //catch (Exception ex)
-                //{
-                //    throw ex;
-                //}
-                //using (var streamReaderQuery = new StreamReader(httpResponseQd.GetResponseStream()))
-                //{
-                //    var putQuery = streamReaderQuery.ReadToEnd();
-                    
-                //}
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
         
@@ -159,15 +163,11 @@ namespace LargeFileExtraction
                     string jsondata = "{\"id\":\"" + processGroupId + "\",\"state\":\"" + state + "\"}";
                     streamWriterStart.Write(jsondata);
                 }
-                //var httpResponseStart = (HttpWebResponse)httpWebRequestStart.GetResponse();
-                //using (var streamReaderStart = new StreamReader(httpResponseStart.GetResponseStream()))
-                //{
-                //    var putStart = streamReaderStart.ReadToEnd();
-                //}
+                var httpResponseStart = (HttpWebResponse)httpWebRequestStart.GetResponse();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
     }
