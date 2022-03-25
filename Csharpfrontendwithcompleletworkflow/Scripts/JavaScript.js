@@ -7,7 +7,7 @@
         var files = $('#file')[0].files[0];
         fd.append('file', files)
         fd.append('options', option);
-        alert(fd);
+        
 
 
         $.ajax({
