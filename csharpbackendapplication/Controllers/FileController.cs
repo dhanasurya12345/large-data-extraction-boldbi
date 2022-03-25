@@ -28,7 +28,7 @@ namespace LargeFileExtraction.Controllers
         private string uploadFileName = "";
         private string uploadFullPath = "";
         private string fileNameWithoutExtension = "";
-        private string chooseMethod = "";
+       
 
 
         [HttpGet]
@@ -45,15 +45,13 @@ namespace LargeFileExtraction.Controllers
         {
             try
             {
-
-                foreach (var key in HttpContext.Request.Form.Keys)
-                {
-                    chooseMethod = HttpContext.Request.Form["options"];
-                }
+               
+                string chosenApproach = "";
+                chosenApproach = HttpContext.Request.Form["options"];
                 var file = Request.Form.Files[0];
                 var result = await WriteFile(file);
 
-                if (chooseMethod == "DIP")
+                if (chosenApproach == "DIP")
                 {
                     var appConfiguration = ReadAppConfiguration();
                     DipHelper dipHelper = new DipHelper();
