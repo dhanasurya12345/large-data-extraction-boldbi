@@ -7,6 +7,6 @@
 		"Password": "<UMS password or Dip Login>"
 	},
 	"PostgreSQL": {
-		"ConnectionString": ""
+		"ConnectionString": "Host=<Postgres hostname>;Username=<Postgres Username>;Password=<Postgres Password>;Database=<Postgres Databasename>;"
 	}
 }

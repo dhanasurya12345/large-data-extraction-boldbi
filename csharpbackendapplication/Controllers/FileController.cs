@@ -28,7 +28,8 @@ namespace LargeFileExtraction.Controllers
         private string uploadFileName = "";
         private string uploadFullPath = "";
         private string fileNameWithoutExtension = "";
-        
+        private string chooseMethod = "";
+
 
         [HttpGet]
         [Route("get")]
@@ -40,41 +41,50 @@ namespace LargeFileExtraction.Controllers
         [HttpPost]
         [Route("savefile")]
         [RequestFormLimits(MultipartBodyLengthLimit = 5097152000)]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        public async Task<IActionResult> UploadFile()
         {
             try
             {
 
+                foreach (var key in HttpContext.Request.Form.Keys)
+                {
+                    chooseMethod = HttpContext.Request.Form["options"];
+                }
+                var file = Request.Form.Files[0];
                 var result = await WriteFile(file);
 
-                //if ("dip")
-                //{
-                //var appConfiguration = ReadAppConfiguration();
-                //DipHelper dipHelper = new DipHelper();
-                //dipHelper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
-               // var resp = "Uploaded! DIP workflow started successfully";
-
-                //}
-                //else
-                //{
-                XlsioHelper xlsioHelper = new XlsioHelper(uploadFullPath, fileNameWithoutExtension);
-                if (uploadFileName.EndsWith(".csv"))
+                if (chooseMethod == "DIP")
                 {
-
-                    xlsioHelper.CsvReader();
-                    var resp = "Uploaded! Csv File moved to  Postgress Database Successfully.";
-
+                    var appConfiguration = ReadAppConfiguration();
+                    DipHelper dipHelper = new DipHelper();
+                    dipHelper.DipWorkFlow(appConfiguration.DIPConfiguration, uploadPath, uploadFileName);
+                    var resp = "Uploaded! DIP workflow started successfully";
                     return Ok(resp);
                 }
                 else
                 {
-                    xlsioHelper.ExcelReader();
-                    var resp = "Uploaded! Excel File moved to Postgress Database Successfully.";
 
-                    return Ok(resp);
+                    XlsioHelper xlsioHelper = new XlsioHelper(uploadFullPath, fileNameWithoutExtension);
+                    if (uploadFileName.EndsWith(".csv"))
+                    {
+
+                        xlsioHelper.CsvReader();
+                        var resp = "Uploaded! Csv File moved to  Postgress Database Successfully.";
+
+                        return Ok(resp);
+                    }
+                    else
+                    {
+                        xlsioHelper.ExcelReader();
+                        var resp = "Uploaded! Excel File moved to Postgress Database Successfully.";
+
+                        return Ok(resp);
+                    }
                 }
-                //}
-               // return Ok(resp);
+                
+               
+                
+              //  return Ok(resp);
 
             }
             catch (Exception e)
