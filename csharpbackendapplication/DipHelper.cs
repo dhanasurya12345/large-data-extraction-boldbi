@@ -143,6 +143,8 @@ namespace LargeFileExtraction
                     string jsondata = "{\"revision\":{\"clientId\":\"" + clientId + "\",\"version\":\"" + getfileVersion + "\"},\"component\":{\"id\":\"" + getFileDict + "\",\"config\": {\"properties\": {\"Input Directory\":\"" + filepath + "\",\"File Filter\":\"" + uploadFileName + "\"}}}}";
                     streamWriterQuery.Write(jsondata);
                 }
+                HttpWebResponse httpResponseQd = null;
+                httpResponseQd = (HttpWebResponse)httpWebRequest.GetResponse();
             }
             catch (Exception ex)
             {
