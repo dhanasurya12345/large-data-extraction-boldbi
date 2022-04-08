@@ -1,5 +1,4 @@
-﻿var cacheMemory;
-$(document).ready(function () {
+﻿$(document).ready(function () {
     $('#but_upload').click(function () {
         $("#upl").empty();
         $("#upl").append('<img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"style="width: 50px; height: 20px; color:green" />', ' File is Uploading...');
@@ -24,7 +23,7 @@ $(document).ready(function () {
                 $("#upl").empty();
                 $("#upl").append('<img src="https://static9.depositphotos.com/1431107/1143/i/950/depositphotos_11437164-stock-photo-green-tick.jpg"alt=""style="width: 30px; height: 20px;" />', ' File uploaded Successfully');
                 $("#but_upload").attr("disabled", true);
-                dipResponse();
+                getprocessordetails();
             },
             error: function (respose) {
                 $("#upl").empty();
@@ -41,31 +40,21 @@ $(document).ready(function () {
 
     });
 });
-function dipResponse() {
+function getprocessordetails() {
 
     $.ajax({
-
         url: 'http://localhost:49054/api/file/getdipresponse',
         type: 'get',
         async: true,
-        success: function (response) {
+        success: function (response) {         
+            if (response == true) {
 
-
-            cacheMemory = response;
-            if (cacheMemory == true) {
-
-                alert(cacheMemory);
+                alert("Button has been Enabled, Upload the next file to Trigger the DIP");
                 $("#but_upload").attr("disabled", false);
-
             }
-
-            if (cacheMemory == false) {
-                dipResponse();
+            if (response == false) {
+                getprocessordetails();
             }
-
-
-
-
         }
 
     });
