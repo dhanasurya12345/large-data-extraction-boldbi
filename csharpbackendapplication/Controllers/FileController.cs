@@ -38,6 +38,17 @@ namespace LargeFileExtraction.Controllers
             return Ok("Application is running");
         }
 
+        [HttpGet]
+        [Route("getdipresponse")]
+        public async Task<IActionResult> GetDipByteResponse()
+        {
+            var appConfigurationGetResponse = ReadAppConfiguration();
+            DipHelper dipHelperGetResponse = new DipHelper();
+            bool dipbyteResponse = dipHelperGetResponse.DipWorkFlowBytesResponse(appConfigurationGetResponse.DIPConfiguration);
+            return Ok(dipbyteResponse);
+        }
+
+
         [HttpPost]
         [Route("savefile")]
         [RequestFormLimits(MultipartBodyLengthLimit = 5097152000)]
@@ -88,7 +99,7 @@ namespace LargeFileExtraction.Controllers
             catch (Exception e)
             {
                 var resp = "Upload failed!\n Error : " + e;
-                return Ok(resp);
+                return BadRequest(resp);
             }
         }
 

@@ -1122,18 +1122,18 @@ namespace LargeFileExtraction
         public string type { get; set; }
         public string runStatus { get; set; }
         public string executionNode { get; set; }
-        public int bytesRead { get; set; }
-        public int bytesWritten { get; set; }
+        public long bytesRead { get; set; }
+        public long bytesWritten { get; set; }
         public string read { get; set; }
         public string written { get; set; }
         public int flowFilesIn { get; set; }
-        public int bytesIn { get; set; }
+        public long bytesIn { get; set; }
         public string input { get; set; }
         public int flowFilesOut { get; set; }
-        public int bytesOut { get; set; }
+        public long bytesOut { get; set; }
         public string output { get; set; }
         public int taskCount { get; set; }
-        public int tasksDurationNanos { get; set; }
+        public long tasksDurationNanos { get; set; }
         public string tasks { get; set; }
         public string tasksDuration { get; set; }
         public int activeThreadCount { get; set; }

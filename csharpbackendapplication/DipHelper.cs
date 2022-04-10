@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 
 namespace LargeFileExtraction
@@ -26,6 +27,23 @@ namespace LargeFileExtraction
                 DIPProcessDetails(url, dipConfig.ProcessGroupId, accessToken);
                 StartGetFileProcessor(url, clientid, accessToken, uploadPath, uploadFileName);
                 StartProcessGroup(url, "RUNNING", dipConfig.ProcessGroupId, accessToken);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        internal bool DipWorkFlowBytesResponse(DipConfiguration dipConfig)
+        {
+            try
+            {
+                string url = string.Format("https://{0}:{1}/dataintegration-api/", dipConfig.HostName, dipConfig.PortNumber);
+                string accessToken = UmsDetails(url, dipConfig.Username, dipConfig.Password);
+                bool totalbytesResponse = DIPProcessorsBytesResponse(url, dipConfig.ProcessGroupId, accessToken);
+
+
+                return totalbytesResponse;
             }
             catch (Exception ex)
             {
@@ -128,7 +146,38 @@ namespace LargeFileExtraction
                 throw ex;
             }
         }
-        
+
+        public bool DIPProcessorsBytesResponse(string url, string processGroupId, string accessToken)
+        {
+            try
+            {
+
+                var httpWebRequestId = (HttpWebRequest)WebRequest.Create(url + "flow/process-groups/" + processGroupId);
+                httpWebRequestId.Method = "GET";
+                httpWebRequestId.Headers.Add("Authorization", "Bearer " + accessToken);
+                var httpResponseId = (HttpWebResponse)httpWebRequestId.GetResponse();
+                using (var streamReaderId = new StreamReader(httpResponseId.GetResponseStream()))
+                {
+                    var processGroupResult = streamReaderId.ReadToEnd();
+                    var processorsData = JsonConvert.DeserializeObject<DIPProperties>(processGroupResult).processGroupFlow.flow.processors;
+                    foreach (var items in processorsData)
+                    {
+                        if (items.status.aggregateSnapshot.bytesIn > 0 || items.status.aggregateSnapshot.bytesOut > 0)
+                        {
+
+                            Thread.Sleep(10000);
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public void StartGetFileProcessor(string url, string clientId, string accessToken,string uploadPath,string uploadFileName)
         {
             try
