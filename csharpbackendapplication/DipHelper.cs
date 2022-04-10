@@ -42,7 +42,6 @@ namespace LargeFileExtraction
                 string accessToken = UmsDetails(url, dipConfig.Username, dipConfig.Password);
                 bool totalbytesResponse = DIPProcessorsBytesResponse(url, dipConfig.ProcessGroupId, accessToken);
 
-
                 return totalbytesResponse;
             }
             catch (Exception ex)
@@ -151,7 +150,6 @@ namespace LargeFileExtraction
         {
             try
             {
-
                 var httpWebRequestId = (HttpWebRequest)WebRequest.Create(url + "flow/process-groups/" + processGroupId);
                 httpWebRequestId.Method = "GET";
                 httpWebRequestId.Headers.Add("Authorization", "Bearer " + accessToken);
